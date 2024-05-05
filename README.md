@@ -48,7 +48,16 @@ git clone https://github.com/Tayyab-Ejaz/parking_management_api
 cd parking_management_api
 ```
 
-3.Build the Docker container:
+
+3. Clone the frontend repository:
+
+```
+cd /parking_management_system
+git clone https://github.com/Tayyab-Ejaz/parking_management_frontend
+```
+
+
+4.Build the Docker container:
 ```
 docker-compose build
 docker-compose up
@@ -60,4 +69,7 @@ docker-compose up
 docker-compose run rails rails db:migrate
 docker-compose run rails rails db:seed
 ```
+
+
+
 
