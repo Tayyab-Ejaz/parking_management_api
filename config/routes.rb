@@ -11,7 +11,7 @@ Rails.application.routes.draw do
   }
 
   resources :parking_slots
-  resources :car_types
+  resources :car_types, only: [:index]
   resources :reservations, only: [:index, :create, :destroy] do
     member do
       patch 'update_status'

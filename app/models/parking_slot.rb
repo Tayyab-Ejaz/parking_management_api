@@ -20,17 +20,17 @@ class ParkingSlot < ApplicationRecord
 
     def initialize_default_working_hours
         days_of_week = {
-          1 => { start_time: '08:00', end_time: '18:00' },
-          2 => { start_time: '08:00', end_time: '18:00' },
-          3 => { start_time: '08:00', end_time: '18:00' },
-          4 => { start_time: '08:00', end_time: '18:00' },
-          5 => { start_time: '08:00', end_time: '18:00' },
-          6 => nil,
-          0 => nil
+          1 => { start_time: '00:00', end_time: '23:00', closed: false },
+          2 => { start_time: '00:00', end_time: '23:00', closed: false },
+          3 => { start_time: '00:00', end_time: '23:00', closed: false },
+          4 => { start_time: '00:00', end_time: '23:00', closed: false },
+          5 => { start_time: '00:00', end_time: '23:00', closed: false },
+          6 => { start_time: '00:00', end_time: '23:00', closed: true },
+          0 => { start_time: '00:00', end_time: '23:00', closed: true }
         }
     
         days_of_week.each do |day, hours|
-          working_hours.create(day: day, start_time: hours&.fetch(:start_time), end_time: hours&.fetch(:end_time))
+          working_hours.create(day: day, closed: hours&.fetch(:closed), start_time: hours&.fetch(:start_time), end_time: hours&.fetch(:end_time))
         end
       end
 end

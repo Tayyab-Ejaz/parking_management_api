@@ -1,31 +1,38 @@
 class ParkingSlotsController < ApplicationController
   before_action :authenticate_user! 
 
-  def index
+
+      # if start_time.present? && end_time.present? && start_time > end_time
+    # # If crossing midnight, consider end_time as the first time on the next day
+    #     end_time_string = '23:59:59'
+    # end
+
+    # # Apply time-based filters for availability
+    # if start_time.present?
+    #     slots = slots.where("CAST(availability_time_start AS TIME) <= ?", start_time)
+    # end
+
+    # if end_time.present?
+    #     slots = slots.where("CAST(availability_time_end AS TIME) >= ?", end_time)
+    # end
+
+    def index
       slots = ParkingSlot.all
     
-      start_time = params[:start_time]
-      end_time = params[:end_time]
-
+      return render json: { message: "start_time and end_time are required params.", status: 403 }  if params[:start_time].blank? || params[:end_time].blank?
       
-      return render json: { message: "start_time and end_time are required params.", status: 403 }  if start_time.blank? || end_time.blank?
-    
-      # if start_time.present? && end_time.present? && start_time > end_time
-      # # If crossing midnight, consider end_time as the first time on the next day
-      #     end_time_string = '23:59:59'
-      # end
-  
-      # # Apply time-based filters for availability
-      # if start_time.present?
-      #     slots = slots.where("CAST(availability_time_start AS TIME) <= ?", start_time)
-      # end
-  
-      # if end_time.present?
-      #     slots = slots.where("CAST(availability_time_end AS TIME) >= ?", end_time)
-      # end
-
-
-      # Check for overlapping reservations
+      start_time = params[:start_time] ? DateTime.parse(params[:start_time]) : nil
+      end_time = params[:end_time] ? DateTime.parse(params[:end_time]) : nil
+      
+      slots = slots.joins(:working_hours)
+       .where(
+         "working_hours.day = ? AND 
+          working_hours.closed = false AND 
+          working_hours.start_time <= ? AND 
+          working_hours.end_time >= ?",
+          start_time.wday, start_time.strftime('%H:%M'), end_time.strftime('%H:%M')
+      )
+      
       if start_time.present? && end_time.present?
         overlapping_reservations = Reservation.where(
           "start_time < ? AND end_time > ?",
@@ -50,7 +57,6 @@ class ParkingSlotsController < ApplicationController
       end
     
 
-      # Apply pagination with kaminari
       per_page = (params[:per_page] || 10).to_i
       page = (params[:page] || 1).to_i
       slots = slots.page(page).per(per_page)
@@ -63,7 +69,6 @@ class ParkingSlotsController < ApplicationController
       }
     end
 
-  # Create a new parking slot
   def create
     slot = ParkingSlot.new(parking_slot_params)
     if slot.save
