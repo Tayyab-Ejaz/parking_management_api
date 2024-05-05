@@ -2,15 +2,12 @@ class Admin::ParkingSlotsController < Admin::BaseController
   def index
     slots = ParkingSlot.all
   
-    
-
     if params[:start_time].present? && params[:end_time].present?
       return render json: { message: "start_time should be before end_time.", }, status: 422  unless valid_time_range?(params[:start_time], params[:end_time])
 
       start_time = params[:start_time] ? DateTime.parse(params[:start_time]) : nil
       end_time = params[:end_time] ? DateTime.parse(params[:end_time]) : nil
 
-      # filter out of working hour slots
       slots = slots.joins(:working_hours)
         .where(
           "working_hours.day = ? AND 
@@ -20,7 +17,6 @@ class Admin::ParkingSlotsController < Admin::BaseController
           start_time.wday, start_time.strftime('%H:%M'), end_time.strftime('%H:%M')
       )
 
-      # filter out the resreved slots
       overlapping_reservations = Reservation.where(
         "start_time < ? AND end_time > ?",
         end_time, start_time
@@ -42,8 +38,6 @@ class Admin::ParkingSlotsController < Admin::BaseController
       slots = slots.joins(:car_types).where(car_types: { id: car_type_ids }).distinct
     end
   
-
-    # Apply pagination with kaminari
     per_page = (params[:per_page] || 10).to_i
     page = (params[:page] || 1).to_i
     slots = slots.order(updated_at: :desc).page(page).per(per_page)
@@ -55,7 +49,6 @@ class Admin::ParkingSlotsController < Admin::BaseController
       total_count: slots.total_count,
     }
   end
-  
 
   def update
     slot = ParkingSlot.find(params[:id])
@@ -67,7 +60,6 @@ class Admin::ParkingSlotsController < Admin::BaseController
   end
 
   private
-
 
   def parking_slot_params
     params.require(:parking_slot).permit(

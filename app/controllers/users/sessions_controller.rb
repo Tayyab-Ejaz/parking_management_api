@@ -4,14 +4,6 @@ class Users::SessionsController < Devise::SessionsController
   respond_to :json
   include RackSessionsFix
 
-
-  def respond_with(current_user, _opts = {})
-    render json: {
-      message: 'Logged in successfully..',
-        data: { user: current_user }
-    }, status: :ok
-  end
-
   def respond_with(resource, _opt = {})
     @token = request.env['warden-jwt_auth.token']
 
@@ -32,12 +24,10 @@ class Users::SessionsController < Devise::SessionsController
     
     if current_user
       render json: {
-        status: 200,
         message: 'Logged out successfully.'
       }, status: :ok
     else
       render json: {
-        status: 401,
         message: "Couldn't find an active session."
       }, status: :unauthorized
     end
