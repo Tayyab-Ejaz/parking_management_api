@@ -28,7 +28,7 @@ module ParkingManagementApi
     # Middleware like session, flash, cookies can be added back manually.
     # Skip views, helpers and assets when generating a new resource.
 
-    config.time_zone = 'Asia/Dubai'
+    # config.time_zone = 'Asia/Dubai'
     config.active_record.default_timezone = :local
     config.api_only = true
   end
