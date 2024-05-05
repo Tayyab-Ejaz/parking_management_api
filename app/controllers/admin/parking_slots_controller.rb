@@ -2,32 +2,29 @@ class Admin::ParkingSlotsController < Admin::BaseController
   def index
     slots = ParkingSlot.all
   
-    start_time = params[:start_time]
-    end_time = params[:end_time]
-
     
-    # if start_time.present? && end_time.present? && start_time > end_time
-    # # If crossing midnight, consider end_time as the first time on the next day
-    #     end_time_string = '23:59:59'
-    # end
 
-    # # Apply time-based filters for availability
-    # if start_time.present?
-    #     slots = slots.where("CAST(availability_time_start AS TIME) <= ?", start_time)
-    # end
+    if params[:start_time].present? && params[:end_time].present?
+      return render json: { message: "start_time should be before end_time.", }, status: 422  unless valid_time_range?(params[:start_time], params[:end_time])
 
-    # if end_time.present?
-    #     slots = slots.where("CAST(availability_time_end AS TIME) >= ?", end_time)
-    # end
+      start_time = params[:start_time] ? DateTime.parse(params[:start_time]) : nil
+      end_time = params[:end_time] ? DateTime.parse(params[:end_time]) : nil
 
+      # filter out of working hour slots
+      slots = slots.joins(:working_hours)
+        .where(
+          "working_hours.day = ? AND 
+          working_hours.closed = false AND 
+          working_hours.start_time <= ? AND 
+          working_hours.end_time >= ?",
+          start_time.wday, start_time.strftime('%H:%M'), end_time.strftime('%H:%M')
+      )
 
-    # Check for overlapping reservations
-    if start_time.present? && end_time.present?
+      # filter out the resreved slots
       overlapping_reservations = Reservation.where(
         "start_time < ? AND end_time > ?",
         end_time, start_time
       )
-  
       reserved_slot_ids = overlapping_reservations.where.not(status: Reservation.statuses[:cancelled]).pluck(:parking_slot_id)
       slots = slots.where.not(id: reserved_slot_ids) 
     end
