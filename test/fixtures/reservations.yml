@@ -1,0 +1,19 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  user: one
+  parking_slot: one
+  start_time: 2024-05-01 16:14:26
+  end_time: 2024-05-01 16:14:26
+  status: MyString
+  checkin_time: 2024-05-01 16:14:26
+  checkout_time: 2024-05-01 16:14:26
+
+two:
+  user: two
+  parking_slot: two
+  start_time: 2024-05-01 16:14:26
+  end_time: 2024-05-01 16:14:26
+  status: MyString
+  checkin_time: 2024-05-01 16:14:26
+  checkout_time: 2024-05-01 16:14:26

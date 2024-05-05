@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: postgres_user
+      POSTGRES_PASSWORD: postgres_password
+      POSTGRES_DB: parking_management_db
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  rails:
+    build: .
+    environment:
+      DB_USERNAME: postgres_user
+      DB_PASSWORD: postgres_password
+      DB_HOST: db
+      devise_jwt_secret_key: sdkfjsdfi823u83jx2r3j2k3jnxrj2hj219x3u1091i203c12312ix30-i2912jcriuwfdnkjjs9cudjf9xc0v--23=23=20320
+      RAILS_ENV: development
+    command: /bin/sh -c "bundle exec rails db:migrate && bundle exec rails server -b 0.0.0.0"
+    volumes:
+      - .:/rails
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+
+  react:
+    build:
+      context: ../parking_management_frontend
+      dockerfile: Dockerfile
+    volumes:
+      - ../parking_management_frontend:/app  
+    ports:
+      - "3001:3000"  # Expose React on port 3001
+    environment:
+      - REACT_APP_API_URL=http://localhost:3000  # API endpoint
+      - WATCHPACK_POLLING=true
+    depends_on:
+      - rails
+
+volumes:
+  pgdata:
